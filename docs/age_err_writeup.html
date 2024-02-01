@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Maia Kapur maia.kapur@noaa.gov">
+
+<title>Order of Operations for Bootstrapping Age Comps</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="age_err_writeup_files/libs/clipboard/clipboard.min.js"></script>
+<script src="age_err_writeup_files/libs/quarto-html/quarto.js"></script>
+<script src="age_err_writeup_files/libs/quarto-html/popper.min.js"></script>
+<script src="age_err_writeup_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="age_err_writeup_files/libs/quarto-html/anchor.min.js"></script>
+<link href="age_err_writeup_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="age_err_writeup_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="age_err_writeup_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="age_err_writeup_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="age_err_writeup_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#defining-the-two-approaches-mathematically" id="toc-defining-the-two-approaches-mathematically" class="nav-link" data-scroll-target="#defining-the-two-approaches-mathematically">Defining the two approaches mathematically</a>
+  <ul class="collapse">
+  <li><a href="#current-approach-routine-1" id="toc-current-approach-routine-1" class="nav-link" data-scroll-target="#current-approach-routine-1">Current approach (Routine 1)</a></li>
+  <li><a href="#correct-approach-routine-2" id="toc-correct-approach-routine-2" class="nav-link" data-scroll-target="#correct-approach-routine-2">“Correct” Approach (Routine 2)</a></li>
+  </ul></li>
+  <li><a href="#a-visual-comparison" id="toc-a-visual-comparison" class="nav-link" data-scroll-target="#a-visual-comparison">A visual comparison</a></li>
+  <li><a href="#how-this-fits-in-the-literature" id="toc-how-this-fits-in-the-literature" class="nav-link" data-scroll-target="#how-this-fits-in-the-literature">How this fits in the literature</a></li>
+  <li><a href="#what-next" id="toc-what-next" class="nav-link" data-scroll-target="#what-next">What next?</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Order of Operations for Bootstrapping Age Comps</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Maia Kapur maia.kapur@noaa.gov </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>On p 170 of the <a href="https://repository.library.noaa.gov/view/noaa/23884/noaa_23884_DS1.pdf">SS3 User Manual</a> v <code>3.30.15</code>:</p>
+<blockquote class="blockquote">
+<p>“Currently, the aging error matrix is multiplied by the expected distribution of proportions at age, while the more correct order of operations would be to sample true ages, and then sample the observed age including aging error (it is possible these are mathematically identical).”</p>
+</blockquote>
+<p>I was curious whether or not this was actually true.</p>
+</section>
+<section id="defining-the-two-approaches-mathematically" class="level1">
+<h1>Defining the two approaches mathematically</h1>
+<section id="current-approach-routine-1" class="level2">
+<h2 class="anchored" data-anchor-id="current-approach-routine-1">Current approach (Routine 1)</h2>
+<p>The “current” setup can be represented as:</p>
+<p><span class="math inline">\(\bf{\hat{P}} = \bf{\tilde{P}} \times \bf{\tilde{A}}\)</span></p>
+<p>Where <span class="math inline">\(\bf{\hat{P}}\)</span> is the boostrapped frequency or proportion of individuals at age <span class="math inline">\(a\)</span>; <span class="math inline">\(\bf{\tilde{A}}\)</span> is an <span class="math inline">\(a \times a\)</span> matrix of ageing-error probabilities, where the columns sum to 1; and <span class="math inline">\(\bf{\tilde{P}}_a\)</span> is the <em>expected</em> distribution of proportions-at-age, resampled from the vector of true population age frequencies <span class="math inline">\(\bf{{P}}\)</span> and given a specific number of total samples <span class="math inline">\(n\)</span>:</p>
+<p><span class="math inline">\(\tilde{\bf{P}} \sim multinom(n, \bf{{P}})\)</span>.</p>
+</section>
+<section id="correct-approach-routine-2" class="level2">
+<h2 class="anchored" data-anchor-id="correct-approach-routine-2">“Correct” Approach (Routine 2)</h2>
+<p>The second approach resamples the true population to return <span class="math inline">\(\tilde{\bf{P}}\)</span> as above, but instead of multiplying by the ageing-error matrix, the expected proportions are re-sampled a second time using the respective values in the ageing-error matrix as the underlying proportions. In principle, this more accurately represents the actual sampling procedure whereby 1) fish are sampled (brought aboard the survey vessel) in a multinomial process from the true population, and then 2) the ‘read’ ages of those individual otoliths are distributed around the ‘true’ age of each fish, given an ageing error matrix. This should more accurately acount for uncertainty arising from both the number of true-age individuals available in the population, as well as the ageing process.</p>
+<p><span class="math inline">\(\hat{P}_a \sim multinom(\tilde{P}_a, \tilde{A}_a)\)</span>.</p>
+</section>
+</section>
+<section id="a-visual-comparison" class="level1">
+<h1>A visual comparison</h1>
+<p>This walk-through assumes we have 25 age bins, take 750 total samples and repeat the experiment 100 times.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n_bins <span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n_samples <span class="ot">&lt;-</span> <span class="dv">750</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>n_experiments <span class="ot">&lt;-</span> <span class="dv">100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here I initialize the ageing-error matrix; the standard error is set to 5 years.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ageing_error_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n_bins, <span class="at">ncol =</span> n_bins)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Fill the ageing-error matrix</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_bins) {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Generate a normally-distributed probability vector</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  prob_vector <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(<span class="dv">1</span><span class="sc">:</span>n_bins, <span class="at">mean =</span> i, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Normalize the probability vector so it sums to 1</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  prob_vector <span class="ot">&lt;-</span> prob_vector <span class="sc">/</span> <span class="fu">sum</span>(prob_vector)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Assign the probability vector to the corresponding column in the ageing-error matrix</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  ageing_error_matrix[, i] <span class="ot">&lt;-</span> prob_vector</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the ageing-error matrix</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#print(ageing_error_matrix)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(reshape2<span class="sc">::</span><span class="fu">melt</span>(ageing_error_matrix), <span class="fu">aes</span>(<span class="at">x =</span> Var1, <span class="at">y =</span> Var2, <span class="at">fill =</span> value)) <span class="sc">+</span> <span class="fu">geom_tile</span>() <span class="sc">+</span><span class="fu">theme_minimal</span>() <span class="sc">+</span><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'none'</span>) <span class="sc">+</span><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">'True Age'</span>, <span class="at">y =</span> <span class="st">'Read Age'</span>, <span class="at">title =</span> <span class="st">'Ageing Error Matrix'</span>, <span class="at">subtitle =</span> <span class="st">'sd = 5'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="age_err_writeup_files/figure-html/aam-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Next we establish the age composition of the true population and run the simulation. I could re-structure this so that a new true population is generated for each experiment – <strong>it might be useful to have some straightforward metric for measuring disparities between the Routines.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>prop_c <span class="ot">=</span> <span class="fu">exp</span>(<span class="fu">rnorm</span>(n_bins)) <span class="do">## randomly generate a vector of lognormal proportions for this experiment; length equal to number of bins </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>prop_c <span class="ot">=</span> prop_c <span class="sc">/</span> <span class="fu">sum</span>(prop_c) <span class="do">## rescale to get "true" population comp in bin (sums to 1)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sample from multinomial; the prob of observing a given bin is given by prop_c</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>experiment_results <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">rmultinom</span>(<span class="at">n =</span> n_experiments, <span class="at">size =</span> n_samples, <span class="at">prob =</span> prop_c)) </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## normalize as computation happens</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>routine1_results <span class="ot">&lt;-</span> (experiment_results<span class="sc">/</span><span class="fu">rowSums</span>(experiment_results)) <span class="sc">%*%</span> ageing_error_matrix</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize the results matrix</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>routine2_results <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">ncol =</span> n_bins, <span class="at">nrow =</span>n_experiments)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform the second routine for each experiment</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_experiments) {</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="do">## make a placeholder with a row for each age candidate</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n_bins, <span class="at">ncol =</span> n_bins)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_bins) {</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sample from the observed ages using the ageing-error matrix as the probabilities</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    temp[j,] <span class="ot">&lt;-</span> <span class="fu">rmultinom</span>(<span class="at">n=</span><span class="dv">1</span>, <span class="do">## once per experiment</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> experiment_results[i, j],   <span class="do">## as if reading this many otoliths</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">prob =</span> ageing_error_matrix[, j])   <span class="do">## the probability of observing a given bin is given by the ageing error matrix</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>   routine2_results[i, ] <span class="ot">&lt;-</span> <span class="fu">colSums</span>(temp)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">#routine2_results[routine2_results==0] &lt;- 1e-5 ## avoid division by zero</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>routine2_results <span class="ot">&lt;-</span> routine2_results<span class="sc">/</span>(<span class="fu">rowSums</span>(routine2_results)) <span class="do">## normalize</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the matrices to data frames</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>routine1_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(routine1_results)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>routine2_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(routine2_results)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a column for the experiment number</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>routine1_df<span class="sc">$</span>experiment <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(routine1_df)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>routine2_df<span class="sc">$</span>experiment <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(routine2_df)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape the data frames to a long format</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>routine1_long <span class="ot">&lt;-</span> reshape2<span class="sc">::</span><span class="fu">melt</span>(routine1_df, <span class="at">id.vars =</span> <span class="st">"experiment"</span>, <span class="at">variable.name =</span> <span class="st">"age_bin"</span>, <span class="at">value.name =</span> <span class="st">"count"</span>)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>routine2_long <span class="ot">&lt;-</span> reshape2<span class="sc">::</span><span class="fu">melt</span>(routine2_df, <span class="at">id.vars =</span> <span class="st">"experiment"</span>, <span class="at">variable.name =</span> <span class="st">"age_bin"</span>, <span class="at">value.name =</span> <span class="st">"count"</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a column for the routine number</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>routine1_long<span class="sc">$</span>routine <span class="ot">&lt;-</span> <span class="st">"Routine 1"</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>routine2_long<span class="sc">$</span>routine <span class="ot">&lt;-</span> <span class="st">"Routine 2"</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine the data frames</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>combined_df <span class="ot">&lt;-</span> <span class="fu">rbind</span>(routine1_long, routine2_long) </span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the age_bin column to numeric</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>combined_df<span class="sc">$</span>age_bin <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">"V"</span>, <span class="st">""</span>, combined_df<span class="sc">$</span>age_bin))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here we visualize the results; it’s evident that the second approach (accounting for ageing error) results in more uncertainty than the current one.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the density plot</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(combined_df, <span class="fu">aes</span>(<span class="at">x =</span> age_bin, <span class="at">y  =</span> count, <span class="at">color =</span> routine, <span class="at">fill =</span> routine, <span class="at">group =</span> experiment)) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">age_bin =</span> <span class="dv">1</span><span class="sc">:</span>n_bins, <span class="at">count =</span> prop_c,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">routine =</span> <span class="st">'true population'</span>, <span class="at">experiment =</span> <span class="dv">1</span>))<span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>routine)<span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'none'</span>)<span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Routine 1"</span> <span class="ot">=</span> <span class="st">"red"</span>, <span class="st">"Routine 2"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"true population"</span> <span class="ot">=</span> <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Routine 1"</span> <span class="ot">=</span> <span class="st">"red"</span>, <span class="st">"Routine 2"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"true population"</span> <span class="ot">=</span> <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Age Bin"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">color =</span> <span class="st">""</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Comparison of Age Composition Sampling Routines"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="age_err_writeup_files/figure-html/plot%20sim-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="how-this-fits-in-the-literature" class="level1">
+<h1>How this fits in the literature</h1>
+<p>There are two key recent publications that set up this work nicely. The first (Siskey et. al.&nbsp;2023) was conducted to investigate how changing sampling rates and methods in the survey might impact OFLs. These changes generally involve the number of survey tows from which otoliths were returned. To do so, they built a bootstrapping routine that returns input sample sizes and variation in age compositions. Ageing error is not considered in this analysis, such that the boostrapped datasets used to evaluate impacts on OFL do not consider how mistakes in the reading process might compound issues with reduced sample size or modified sampling effort. I suspect that this study under-estimates the range of variation in management quantities.</p>
+<p>The recent paper by Hulson et. al.&nbsp;(2024) explicitly addresses the fact that <em>“To date, no method has been developed to integrate the variability in the ageing process when reading otoliths…within the estimation of ISS used to statistically weight age composition data in SCAA models”.</em> That paper presents a method to consider the ageing error matrix (and growth variability) in the bootstrapping procedure, <strong>with the specific goal of generating more accurate input sample sizes</strong> – since typically we would not be using bootstrapped data in an assessment. From my reading of their methods, re-sampled ages undergo the second re-sampling step based on the tester ages from the age and growth lab (though they have a few extra steps, like filtering &amp; expanding based on CPUE).</p>
+<p>So, embedded in the 2024 analysis is an updated method to account for ageing error in the bootstrapping process, though how this impacts a) actual boostrapped datasets and/or b) the resultant derived management quantities was not examined.</p>
+</section>
+<section id="what-next" class="level1">
+<h1>What next?</h1>
+<p>Here are some things we haven’t looked at yet.</p>
+<ul>
+<li>How the <span class="math inline">\(\sigma\)</span> on the age-error matrix impacts things,</li>
+<li>Relationship between the number of bins and number of samples,</li>
+<li>Any kind of through-time/cohort effects (would require a population model)</li>
+</ul>
+<p>I see a few ways forward for this work.</p>
+<ul>
+<li>A simple message to Rick Methot stating that we confirm that the methods are <em>not</em> mathematically equivalent, and that the manual and/or Synthesis bootstrapping routines should be updated.</li>
+<li>Something like the above, accompanied by a short communication in Fisheries Research (I have the bandwidth for this).</li>
+<li>A follow-up study that basically conglomerates Siskey and Pete’s work to indicate how we think changes in e.g.&nbsp;sampling effort might impact assessments, given ageing error. This is a big lift and might be best served by a postdoc; would want to involve A&amp;G and Pete.</li>
+</ul>
+</section>
+<section id="citations" class="level1">
+<h1>Citations</h1>
+<p>Hulson, P.-J.F., Williams, B.C., 2024. Inclusion of ageing error and growth variability using a bootstrap estimation of age composition and conditional age-at-length input sample size for fisheries stock assessment models. Fisheries Research 270, 106894. https://doi.org/10.1016/j.fishres.2023.106894</p>
+<p>Siskey, M.R., Punt, A.E., Hulson, P.-J.F., Bryan, M.D., Ianelli, J.N., Thorson, J.T., 2023. The estimated impact of changes to otolith field-sampling and ageing effort on stock assessment inputs, outputs, and catch advice. Can. J. Fish. Aquat. Sci. 80, 115–131. https://doi.org/10.1139/cjfas-2022-0050</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
